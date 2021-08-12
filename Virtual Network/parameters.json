@@ -1,0 +1,67 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "vnetName": {
+      "value": "Test-VNET-Dev"
+    },
+    "vnetAddressPrefixes": {
+      "value": [ "10.0.0.0/16" ]
+    },
+    "subnets": {
+      "value": [
+        {
+          "name": "GatewaySubnet",
+          "addressPrefix": "10.0.255.0/24",
+          "networkSecurityGroupName": "",
+          "routeTableName": "",
+          "serviceEndpoints": [],
+          "delegations": []
+        },
+        {
+          "name": "KeyvaultSubnet",
+          "addressPrefix": "10.0.0.0/24",
+          "networkSecurityGroupName": "",
+          "routeTableName": "",
+          "serviceEndpoints": [
+            {
+              "service": "Microsoft.KeyVault"
+            }
+          ],
+          "delegations": []
+        },
+        {
+          "name": "ManagedInstanceSubnet",
+          "addressPrefix": "10.0.2.0/24",
+          "networkSecurityGroupName": "Test-NSG-Dev",
+          "routeTableName": "Test-RouteTable-Dev",
+          "serviceEndpoints": [],
+          "delegations": [
+            {
+              "name": "sqlMiDel",
+              "properties": {
+                "serviceName": "Microsoft.Sql/managedInstances"
+              }
+            }
+          ]
+        },
+        {
+          "name": "AzureFirewallSubnet",
+          "addressPrefix": "10.0.4.0/24",
+          "networkSecurityGroupName": "",
+          "routeTableName": "",
+          "serviceEndpoints": [],
+          "delegations": []
+        },
+        {
+          "name": "AzureBastionSubnet",
+          "addressPrefix": "10.0.5.0/24",
+          "networkSecurityGroupName": "",
+          "routeTableName": "",
+          "serviceEndpoints": [],
+          "delegations": []
+        }
+      ]
+    }
+  }
+}

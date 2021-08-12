@@ -1,0 +1,92 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "networkSecurityGroupName": {
+      "type": "string",
+      "metadata": {
+        "description": "Required. Name of the Network Security Group."
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Optional. Location for all resources."
+      }
+    },
+    "networkSecurityGroupSecurityRules": {
+      "type": "array",
+      "defaultValue": [
+      ],
+      "metadata": {
+        "description": "Optional. Array of Security Rules to deploy to the Network Security Group. When not provided, an NSG including only the built-in roles will be deployed."
+      }
+    }
+  },
+  "variables": {
+  },
+  "resources": [
+    {
+      "apiVersion": "2020-05-01",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[parameters('networkSecurityGroupName')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+      ],
+      "properties": {
+        "copy": [
+          {
+            "name": "securityRules",
+            "count": "[length(parameters('networkSecurityGroupSecurityRules'))]",
+            "input": {
+              "name": "[parameters('networkSecurityGroupSecurityRules')[copyIndex('securityRules')].name]",
+              "properties": {
+                "description": "[parameters('networkSecurityGroupSecurityRules')[copyIndex('securityRules')].properties.description]",
+                "protocol": "[parameters('networkSecurityGroupSecurityRules')[copyIndex('securityRules')].properties.protocol]",
+                "sourcePortRange": "[parameters('networkSecurityGroupSecurityRules')[copyIndex('securityRules')].properties.sourcePortRange]",
+                "destinationPortRange": "[if(equals(parameters('networkSecurityGroupSecurityRules')[copyIndex('securityRules')].properties.destinationPortRange, ''), json('null'), parameters('networkSecurityGroupSecurityRules')[copyIndex('securityRules')].properties.destinationPortRange)]",
+                "sourceAddressPrefix": "[if(equals(parameters('networkSecurityGroupSecurityRules')[copyIndex('securityRules')].properties.sourceAddressPrefix, ''), json('null'), parameters('networkSecurityGroupSecurityRules')[copyIndex('securityRules')].properties.sourceAddressPrefix)]",
+                "destinationAddressPrefix": "[if(equals(parameters('networkSecurityGroupSecurityRules')[copyIndex('securityRules')].properties.destinationAddressPrefix, ''), json('null'), parameters('networkSecurityGroupSecurityRules')[copyIndex('securityRules')].properties.destinationAddressPrefix)]",
+                "access": "[parameters('networkSecurityGroupSecurityRules')[copyIndex('securityRules')].properties.access]",
+                "priority": "[int(parameters('networkSecurityGroupSecurityRules')[copyIndex('securityRules')].properties.priority)]",
+                "direction": "[parameters('networkSecurityGroupSecurityRules')[copyIndex('securityRules')].properties.direction]",
+                "sourcePortRanges": "[if(equals(length(parameters('networkSecurityGroupSecurityRules')[copyIndex('securityRules')].properties.sourcePortRanges), 0), json('null'), parameters('networkSecurityGroupSecurityRules')[copyIndex('securityRules')].properties.sourcePortRanges)]",
+                "destinationPortRanges": "[if(equals(length(parameters('networkSecurityGroupSecurityRules')[copyIndex('securityRules')].properties.destinationPortRanges), 0), json('null'), parameters('networkSecurityGroupSecurityRules')[copyIndex('securityRules')].properties.destinationPortRanges)]",
+                "sourceAddressPrefixes": "[if(equals(length(parameters('networkSecurityGroupSecurityRules')[copyIndex('securityRules')].properties.sourceAddressPrefixes), 0), json('null'), parameters('networkSecurityGroupSecurityRules')[copyIndex('securityRules')].properties.sourceAddressPrefixes)]",
+                "destinationAddressPrefixes": "[if(equals(length(parameters('networkSecurityGroupSecurityRules')[copyIndex('securityRules')].properties.destinationAddressPrefixes), 0), json('null'), parameters('networkSecurityGroupSecurityRules')[copyIndex('securityRules')].properties.destinationAddressPrefixes)]",
+                "sourceApplicationSecurityGroups": "[if(empty(parameters('networkSecurityGroupSecurityRules')[copyIndex('securityRules')].properties.sourceApplicationSecurityGroupIds), json('null'), concat(variables('emptyArray'), array(json(concat('{\"id\": \"', parameters('networkSecurityGroupSecurityRules')[copyIndex('securityRules')].properties.sourceApplicationSecurityGroupIds[0], '\"', ',', '\"location\": \"', reference(parameters('networkSecurityGroupSecurityRules')[copyIndex('securityRules')].properties.sourceApplicationSecurityGroupIds[0],'2019-04-01', 'Full').location, '\"}')))))]",
+                "destinationApplicationSecurityGroups": "[if(empty(parameters('networkSecurityGroupSecurityRules')[copyIndex('securityRules')].properties.destinationApplicationSecurityGroupIds), json('null'), concat(variables('emptyArray'), array(json(concat('{\"id\": \"', parameters('networkSecurityGroupSecurityRules')[copyIndex('securityRules')].properties.destinationApplicationSecurityGroupIds[0], '\"', ',', '\"location\": \"', reference(parameters('networkSecurityGroupSecurityRules')[copyIndex('securityRules')].properties.destinationApplicationSecurityGroupIds[0],'2019-04-01', 'Full').location, '\"}')))))]"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "functions": [
+  ],
+  "outputs": {
+    "networkSecurityGroupResourceGroup": {
+      "type": "string",
+      "value": "[resourceGroup().name]",
+      "metadata": {
+        "description": "The name of the Resource Group the Network Security Groups were created in."
+      }
+    },
+    "networkSecurityGroupResourceId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]",
+      "metadata": {
+        "description": "The Resource Ids of the Network Security Group deployed."
+      }
+    },
+    "networkSecurityGroupName": {
+      "type": "string",
+      "value": "[parameters('networkSecurityGroupName')]",
+      "metadata": {
+        "description": "The Name of the Network Security Group deployed."
+      }
+    }
+  }
+}

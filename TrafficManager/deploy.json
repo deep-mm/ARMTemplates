@@ -1,0 +1,217 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "trafficManagerName": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "Required. Name of the Traffic Manager"
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Optional. Location for diagnostics settings only. Traffic manager will always be deployed globally."
+      }
+    },
+    "profileStatus": {
+      "type": "string",
+      "defaultValue": "Enabled",
+      "allowedValues": [ "Enabled", "Disabled" ],
+      "metadata": {
+        "description": "Optional. The status of the Traffic Manager profile."
+      }
+    },
+    "trafficRoutingMethod": {
+      "type": "string",
+      "defaultValue": "Performance",
+      "allowedValues": [ "Performance", "Priority", "Weighted", "Geographic", "MultiValue", "Subnet" ],
+      "metadata": {
+        "description": "Optional. The traffic routing method of the Traffic Manager profile."
+      }
+    },
+    "relativeName": {
+      "type": "string",
+      "metadata": {
+        "description": "Required. The relative DNS name provided by this Traffic Manager profile. This value is combined with the DNS domain name used by Azure Traffic Manager to form the fully-qualified domain name (FQDN) of the profile."
+      }
+    },
+    "ttl": {
+      "type": "int",
+      "defaultValue": 60,
+      "metadata": {
+        "description": "Optional. The DNS Time-To-Live (TTL), in seconds. This informs the local DNS resolvers and DNS clients how long to cache DNS responses provided by this Traffic Manager profile."
+      }
+    },
+    "monitorConfig": {
+      "type": "object",
+      "defaultValue": {
+        "profileMonitorStatus": "Online",
+        "protocol": "HTTPS",
+        "port": 443,
+        "path": "/",
+        "intervalInSeconds": 30,
+        "toleratedNumberOfFailures": 3,
+        "timeoutInSeconds": 10,
+        "expectedStatusCodeRanges": [
+          {
+            "min": 200,
+            "max": 299
+          },
+          {
+            "min": 301,
+            "max": 302
+          }
+        ]
+      },
+      "metadata": {
+        "description": "Optional. The endpoint monitoring settings of the Traffic Manager profile."
+      }
+    },
+    "publicIpAddressResourceId": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Optional. The list of endpoints in the Traffic Manager profile."
+      }
+    },
+    "publicIpAddressResourceTarget": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Optional. The list of endpoints in the Traffic Manager profile."
+      }
+    },
+    "trafficViewEnrollmentStatus": {
+      "type": "string",
+      "allowedValues": [ "Disabled", "Enabled" ],
+      "defaultValue": "Disabled",
+      "metadata": {
+        "description": "Optional. Indicates whether Traffic View is 'Enabled' or 'Disabled' for the Traffic Manager profile. Null, indicates 'Disabled'. Enabling this feature will increase the cost of the Traffic Manage profile."
+      }
+    },
+    "maxReturn": {
+      "type": "int",
+      "defaultValue": 1,
+      "metadata": {
+        "description": "Optional. Maximum number of endpoints to be returned for MultiValue routing type."
+      }
+    },
+    "diagnosticLogsRetentionInDays": {
+      "type": "int",
+      "defaultValue": 365,
+      "minValue": 0,
+      "maxValue": 365,
+      "metadata": {
+        "description": "Optional. Specifies the number of days that logs will be kept for; a value of 0 will retain data indefinitely."
+      }
+    },
+    "workspaceId": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Optional. Resource identifier of Log Analytics."
+      }
+    }
+  },
+  "variables": {
+    "diagnosticsMetrics": [
+      {
+        "category": "AllMetrics",
+        "timeGrain": null,
+        "enabled": true,
+        "retentionPolicy": {
+          "enabled": true,
+          "days": "[parameters('diagnosticLogsRetentionInDays')]"
+        }
+      }
+    ],
+    "diagnosticsLogs": [
+      {
+        "category": "ProbeHealthStatusEvents",
+        "enabled": true,
+        "retentionPolicy": {
+          "enabled": true,
+          "days": "[parameters('diagnosticLogsRetentionInDays')]"
+        }
+      }
+    ]
+  },
+  "resources": [
+    {
+      "name": "[parameters('trafficManagerName')]",
+      "type": "Microsoft.Network/trafficmanagerprofiles",
+      "apiVersion": "2018-04-01",
+      "location": "global",
+      "properties": {
+        "profileStatus": "[parameters('profileStatus')]",
+        "trafficRoutingMethod": "[parameters('trafficRoutingMethod')]",
+        "dnsConfig": {
+          "relativeName": "[parameters('relativeName')]",
+          "ttl": "[parameters('ttl')]"
+        },
+        "monitorConfig": "[parameters('monitorConfig')]",
+        "trafficViewEnrollmentStatus": "[parameters('trafficViewEnrollmentStatus')]",
+        "maxReturn": "[parameters('maxReturn')]",
+        "endpoints": [
+          {
+            "id": "[concat(resourceId('Microsoft.Network/trafficManagerProfiles', parameters('trafficManagerName')), '/azureEndpoints/reverse-proxy-primary')]",
+            "name": "reverse-proxy-primary",
+            "type": "Microsoft.Network/trafficManagerProfiles/azureEndpoints",
+            "properties": {
+              "endpointStatus": "Enabled",
+              "targetResourceId": "[parameters('publicIpAddressResourceId')]",
+              "target": "[parameters('publicIpAddressResourceTarget')]",
+              "weight": 1,
+              "priority": 1,
+              "endpointLocation": "[parameters('location')]"
+            }
+          }
+        ]
+      },
+      "resources": [
+        {
+          "type": "Microsoft.Network/trafficmanagerprofiles/providers/diagnosticsettings",
+          "apiVersion": "2017-05-01-preview",
+          "name": "[concat(parameters('trafficManagerName'), '/Microsoft.Insights/service')]",
+          "location": "[parameters('location')]",
+          "dependsOn": [
+            "[concat('Microsoft.Network/trafficmanagerprofiles/', parameters('trafficManagerName'))]"
+          ],
+          "properties": {
+            "workspaceId": "[if(empty(parameters('workspaceId')), json('null'), parameters('workspaceId'))]",
+            "metrics": "[variables('diagnosticsMetrics')]",
+            "logs": "[variables('diagnosticsLogs')]"
+          }
+        }
+      ]
+    }
+  ],
+  "functions": [
+  ],
+  "outputs": {
+    "trafficManagerResourceId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Network/trafficManagerProfiles', parameters('trafficManagerName'))]",
+      "metadata": {
+        "description": "The Resource Id of the Traffic Manager."
+      }
+    },
+    "trafficManagerResourceGroup": {
+      "type": "string",
+      "value": "[resourceGroup().name]",
+      "metadata": {
+        "description": "The name of the Resource Group the Traffic Manager was created in."
+      }
+    },
+    "trafficManagerName": {
+      "type": "string",
+      "value": "[parameters('trafficManagerName')]",
+      "metadata": {
+        "description": "The Name of the Traffic Manager."
+      }
+    }
+  }
+}

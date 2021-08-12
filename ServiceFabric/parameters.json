@@ -1,0 +1,180 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "clusterName": {
+      "value": "cluster-name"
+    },
+    "subnet0Name": {
+      "value": "Subnet-0"
+    },
+    "subnet0Prefix": {
+      "value": "172.17.0.0/27"
+    },
+    "publicIPAddressName": {
+      "value": "PublicIP-VM"
+    },
+    "vmStorageAccountContainerName": {
+      "value": "vhds"
+    },
+    "adminUserName": {
+      "value": "Sfadmin"
+    },
+    "adminPassword": {
+      "value": "securestring"
+    },
+    "virtualNetworkName": {
+      "value": "VNet"
+    },
+    "addressPrefix": {
+      "value": "172.17.0.0/24"
+    },
+    "dnsName": {
+      "value": "string"
+    },
+    "nicName": {
+      "value": "NIC"
+    },
+    "lbName": {
+      "value": "LoadBalancer"
+    },
+    "lbIPName": {
+      "value": "PublicIP-LB-FE"
+    },
+    "vmImageOffer": {
+      "value": "WindowsServer"
+    },
+    "vmImageSku": {
+      "value": "2016-Datacenter"
+    },
+    "loadBalancedAppPort1": {
+      "value": 8081
+    },
+    "loadBalancedAppPort2": {
+      "value": 8082
+    },
+    "sourceVaultValue": {
+      "value": "GEN-KEYVAULT-RESOURCE-ID"
+    },
+    "certificateUrlValue": {
+      "value": "GEN-KEYVAULT-SSL-SECRET-URI"
+    },
+    "secondaryCertificateUrlValue": {
+      "value": "string"
+    },
+    "certificateThumbprint": {
+      "value": "GEN-CUSTOM-DOMAIN-SSLCERT-THUMBPRINT"
+    },
+    "secondaryCertificateThumbprint": {
+      "value": "GEN-CUSTOM-DOMAIN-SSLCERT-THUMBPRINT"
+    },
+    "supportLogStorageAccountName": {
+      "value": "[toLower( concat('sflogs', uniqueString(resourceGroup().id),'2'))]"
+    },
+    "applicationDiagnosticsStorageAccountName": {
+      "value": "[toLower(concat('wad',uniqueString(resourceGroup().id), '3' ))]"
+    },
+    "nt0InstanceCount": {
+      "value": 5
+    },
+    "vmNodeType0Name": {
+      "value": "mapnode1"
+    },
+    "vmNodeType0Size": {
+      "value": "Standard_A2"
+    },
+    "networkSecurityGroupName": {
+      "value": "Default NSG Name"
+    },
+    "workspaceId": {
+      "value": "Default Workspace Id"
+    },
+    "publicIpAddress": {
+      "value": "Default Workspace Id"
+    },
+    "networkSecurityGroupSecurityRules": {
+      "value": [
+        {
+          "name": "Port_8081",
+          "properties": {
+            "description": "Allow inbound access on TCP 8081",
+            "protocol": "TCP",
+            "sourcePortRange": "*",
+            "destinationPortRange": "8081",
+            "sourceAddressPrefix": "[parameters('publicIpAddress')]",
+            "destinationAddressPrefix": "*",
+            "access": "Allow",
+            "priority": 100,
+            "direction": "Inbound",
+            "sourcePortRanges": [],
+            "destinationPortRanges": [],
+            "sourceAddressPrefixes": [],
+            "destinationAddressPrefixes": [],
+            "sourceApplicationSecurityGroupIds": [],
+            "destinationApplicationSecurityGroupIds": []
+          }
+        },
+        {
+          "name": "Port_8082",
+          "properties": {
+            "description": "Allow inbound access on TCP 8082",
+            "protocol": "TCP",
+            "sourcePortRange": "*",
+            "destinationPortRange": "8082",
+            "sourceAddressPrefix": "[parameters('publicIpAddress')]",
+            "destinationAddressPrefix": "*",
+            "access": "Allow",
+            "priority": 110,
+            "direction": "Inbound",
+            "sourcePortRanges": [],
+            "destinationPortRanges": [],
+            "sourceAddressPrefixes": [],
+            "destinationAddressPrefixes": [],
+            "sourceApplicationSecurityGroupIds": [],
+            "destinationApplicationSecurityGroupIds": []
+          }
+        },
+        {
+          "name": "Port_19000",
+          "properties": {
+            "description": "Allow inbound access on TCP 19000",
+            "protocol": "TCP",
+            "sourcePortRange": "*",
+            "destinationPortRange": "19000",
+            "sourceAddressPrefix": "*",
+            "destinationAddressPrefix": "*",
+            "access": "Allow",
+            "priority": 120,
+            "direction": "Inbound",
+            "sourcePortRanges": [],
+            "destinationPortRanges": [],
+            "sourceAddressPrefixes": [],
+            "destinationAddressPrefixes": [],
+            "sourceApplicationSecurityGroupIds": [],
+            "destinationApplicationSecurityGroupIds": []
+          }
+        },
+        {
+          "name": "Port_19080",
+          "properties": {
+            "description": "Allow inbound access on TCP 19080",
+            "protocol": "TCP",
+            "sourcePortRange": "*",
+            "destinationPortRange": "19080",
+            "sourceAddressPrefix": "*",
+            "destinationAddressPrefix": "*",
+            "access": "Allow",
+            "priority": 130,
+            "direction": "Inbound",
+            "sourcePortRanges": [],
+            "destinationPortRanges": [],
+            "sourceAddressPrefixes": [],
+            "destinationAddressPrefixes": [],
+            "sourceApplicationSecurityGroupIds": [],
+            "destinationApplicationSecurityGroupIds": []
+          }
+        }
+      ]
+    }
+  }
+}

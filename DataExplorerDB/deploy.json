@@ -1,0 +1,147 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "clusters_kustocluster_name": {
+      "type": "string",
+      "defaultValue": "[concat('kusto', uniqueString(resourceGroup().id))]",
+      "metadata": {
+        "description": "Name of the cluster to create"
+      }
+    },
+    "databases_kustodb_name": {
+      "type": "string",
+      "defaultValue": "kustodb",
+      "metadata": {
+        "description": "Name of the database to create"
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Location for all resources."
+      }
+    },
+    "eventHubResourceId": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Optional. Resource identifier of Event Hub."
+      }
+    },
+    "env": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Env Name"
+      }
+    }
+  },
+  "variables": {
+    "clusters_kustocluster_name": "[parameters('clusters_kustocluster_name')]",
+    "databases_kustodb_name": "[parameters('databases_kustodb_name')]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Kusto/Clusters/Databases/DataConnections",
+      "apiVersion": "2020-06-14",
+      "name": "[concat(parameters('clusters_kustocluster_name'), '/',parameters('databases_kustodb_name'),'/hdmap',parameters('env'))]",
+      "location": "[parameters('location')]",
+      "kind": "EventHub",
+      "properties": {
+        "eventHubResourceId": "[parameters('eventHubResourceId')]",
+        "consumerGroup": "[concat('cg-hdmap', parameters('env'))]",
+        "tableName": "",
+        "mappingRuleName": "",
+        "dataFormat": "",
+        "eventSystemProperties": [],
+        "compression": "None"
+      }
+    },
+    {
+      "type": "Microsoft.Kusto/Clusters/Databases/DataConnections",
+      "apiVersion": "2020-06-14",
+      "name": "[concat(parameters('clusters_kustocluster_name'), '/',parameters('databases_kustodb_name'),'/hdmap',parameters('env'),'-events')]",
+      "location": "[parameters('location')]",
+      "kind": "EventHub",
+      "properties": {
+        "eventHubResourceId": "[parameters('eventHubResourceId')]",
+        "consumerGroup": "cg-events",
+        "tableName": "Events",
+        "mappingRuleName": "EventsMapping",
+        "dataFormat": "JSON",
+        "eventSystemProperties": [],
+        "compression": "None"
+      }
+    },
+    {
+      "type": "Microsoft.Kusto/Clusters/Databases/DataConnections",
+      "apiVersion": "2020-06-14",
+      "name": "[concat(parameters('clusters_kustocluster_name'), '/',parameters('databases_kustodb_name'),'/hdmap',parameters('env'),'-exceptions')]",
+      "location": "[parameters('location')]",
+      "kind": "EventHub",
+      "properties": {
+        "eventHubResourceId": "[parameters('eventHubResourceId')]",
+        "consumerGroup": "cg-exceptions",
+        "tableName": "Exceptions",
+        "mappingRuleName": "ExceptionsMapping",
+        "dataFormat": "JSON",
+        "eventSystemProperties": [],
+        "compression": "None"
+      }
+    },
+    {
+      "type": "Microsoft.Kusto/Clusters/Databases/DataConnections",
+      "apiVersion": "2020-06-14",
+      "name": "[concat(parameters('clusters_kustocluster_name'), '/',parameters('databases_kustodb_name'),'/hdmap',parameters('env'),'-metrics')]",
+      "location": "[parameters('location')]",
+      "kind": "EventHub",
+      "properties": {
+        "eventHubResourceId": "[parameters('eventHubResourceId')]",
+        "consumerGroup": "cg-metrics",
+        "tableName": "Metrics",
+        "mappingRuleName": "MetricsMapping",
+        "dataFormat": "JSON",
+        "eventSystemProperties": [],
+        "compression": "None"
+      }
+    },
+    {
+      "type": "Microsoft.Kusto/Clusters/Databases/DataConnections",
+      "apiVersion": "2020-06-14",
+      "name": "[concat(parameters('clusters_kustocluster_name'), '/',parameters('databases_kustodb_name'),'/hdmap',parameters('env'),'-requests')]",
+      "location": "[parameters('location')]",
+      "kind": "EventHub",
+      "properties": {
+        "eventHubResourceId": "[parameters('eventHubResourceId')]",
+        "consumerGroup": "cg-requests",
+        "tableName": "Requests",
+        "mappingRuleName": "RequestsMapping",
+        "dataFormat": "JSON",
+        "eventSystemProperties": [],
+        "compression": "None"
+      }
+    },
+    {
+      "type": "Microsoft.Kusto/Clusters/Databases/DataConnections",
+      "apiVersion": "2020-06-14",
+      "name": "[concat(parameters('clusters_kustocluster_name'), '/',parameters('databases_kustodb_name'),'/hdmap',parameters('env'),'-traces')]",
+      "location": "[parameters('location')]",
+      "kind": "EventHub",
+      "properties": {
+        "eventHubResourceId": "[parameters('eventHubResourceId')]",
+        "consumerGroup": "cg-traces",
+        "tableName": "Traces",
+        "mappingRuleName": "TracesMapping",
+        "dataFormat": "JSON",
+        "eventSystemProperties": [],
+        "compression": "None"
+      }
+    }
+  ],
+  "functions": [
+  ],
+  "outputs": {
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "hostingPlanName": {
+      "value": "Test-WebJobHost-07"
+    },
+    "webAppPortalName": {
+      "value": "Test-WebJob-07"
+    },
+    "workerSize": {
+      "value": 1
+    },
+    "sku": {
+      "value": "S1"
+    },
+    "location": {
+      "value": "Central US"
+    },
+    "appinsights_name": {
+      "value": "Test-AppInsightsWebJob-07"
+    },
+    "vNetId": {
+      "value": "/subscriptions"
+    },
+    "storage_name": {
+      "value": "testwebjob"
+    }
+  }
+}

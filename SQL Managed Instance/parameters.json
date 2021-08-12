@@ -1,0 +1,52 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "managedInstanceName": {
+      "value": "ManagedInstance-Dev"
+    },
+    "location": {
+      "value":  "Central US"
+    },
+    "administratorLogin": {
+      "reference": {
+        "keyVault": {
+          "id": ""
+        },
+        "secretName": "administratorLogin"
+      }
+    },
+    "administratorLoginPassword": {
+      "reference": {
+        "keyVault": {
+          "id": ""
+        },
+        "secretName": "administratorLoginPassword"
+      }
+    },
+    "subnetId": {
+      "value": ""
+    },
+    "skuName": {
+      "value": "GP_Gen5"
+    },
+    "skuTier": {
+      "value": "GeneralPurpose"
+    },
+    "storageSizeInGB": {
+      "value": 32
+    },
+    "vCores": {
+      "value": 4
+    },
+    "licenseType": {
+      "value": "LicenseIncluded"
+    },
+    "hardwareFamily": {
+      "value": "Gen5"
+    },
+    "proxyOverride": {
+      "value": "Proxy"
+    }
+  }
+}

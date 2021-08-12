@@ -1,0 +1,325 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "webAppPortalName": {
+      "type": "string",
+      "metadata": {
+        "description": "Required. Name of the Web Application Portal Name"
+      }
+    },
+    "hostingPlanName": {
+      "type": "string",
+      "metadata": {
+        "description": "Required. Name of the Application Service Plan"
+      }
+    },
+    "workerSize": {
+      "type": "int",
+      "defaultValue": 1,
+      "metadata": {
+        "description": "Optional. Defines the number of workers from the worker pool that will be used by the app service plan"
+      }
+    },
+    "numberOfWorkers": {
+      "type": "int",
+      "defaultValue": 1,
+      "metadata": {
+        "description": "Optional. Defines the number of workers from the worker pool that will be used by the app service plan"
+      }
+    },
+    "sku": {
+      "type": "string",
+      "allowedValues": [
+        "F1",
+        "D1",
+        "B1",
+        "B2",
+        "B3",
+        "S1",
+        "S2",
+        "S3",
+        "P1",
+        "P2",
+        "P3",
+        "P4",
+        "Y1"
+      ],
+      "defaultValue": "F1",
+      "metadata": {
+        "description": "Optional. The pricing tier for the hosting plan."
+      }
+    },
+    "skuTier": {
+      "type": "string",
+      "defaultValue": "Dynamic",
+      "metadata": {
+        "description": "SKU Tier"
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Optional. Location for all Resources."
+      }
+    },
+    "appinsights_name": {
+      "defaultValue": "Default AppInsights",
+      "type": "String"
+    },
+    "appServiceTags": {
+      "type": "object",
+      "defaultValue": {
+      },
+      "metadata": {
+        "description": "Optional. Tags of the resource."
+      }
+    },
+    "appInsightsTags": {
+      "type": "object",
+      "defaultValue": {
+      },
+      "metadata": {
+        "description": "Optional. Tags of the resource."
+      }
+    },
+    "diagnosticLogsRetentionInDays": {
+      "type": "int",
+      "defaultValue": 365,
+      "minValue": 0,
+      "maxValue": 365,
+      "metadata": {
+        "description": "Optional. Specifies the number of days that logs will be kept for; a value of 0 will retain data indefinitely."
+      }
+    },
+    "workspaceId": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Optional. Resource identifier of Log Analytics."
+      }
+    },
+    "ipRules": {
+      "type": "array",
+      "defaultValue": [],
+      "metadata": {
+        "description": "Array of IP Rules"
+      }
+    }
+  },
+  "variables": {
+    "diagnosticsMetrics": [
+      {
+        "category": "AllMetrics",
+        "enabled": true,
+        "retentionPolicy": {
+          "days": "[parameters('diagnosticLogsRetentionInDays')]",
+          "enabled": true
+        }
+      }
+    ],
+    "serverfarmdiagnosticsLogs": [
+    ],
+    "diagnosticsLogs": [
+      {
+        "category": "AppServiceHTTPLogs",
+        "enabled": true,
+        "retentionPolicy": {
+          "enabled": true,
+          "days": "[parameters('diagnosticLogsRetentionInDays')]"
+        }
+      },
+      {
+        "category": "AppServiceConsoleLogs",
+        "enabled": true,
+        "retentionPolicy": {
+          "enabled": true,
+          "days": "[parameters('diagnosticLogsRetentionInDays')]"
+        }
+      },
+      {
+        "category": "AppServiceAppLogs",
+        "enabled": true,
+        "retentionPolicy": {
+          "enabled": true,
+          "days": "[parameters('diagnosticLogsRetentionInDays')]"
+        }
+      },
+      {
+        "category": "AppServiceFileAuditLogs",
+        "enabled": true,
+        "retentionPolicy": {
+          "enabled": true,
+          "days": "[parameters('diagnosticLogsRetentionInDays')]"
+        }
+      },
+      {
+        "category": "AppServiceAuditLogs",
+        "enabled": true,
+        "retentionPolicy": {
+          "enabled": true,
+          "days": "[parameters('diagnosticLogsRetentionInDays')]"
+        }
+      }
+    ]
+  },
+  "resources": [
+    {
+      "apiVersion": "2015-05-01",
+      "name": "[parameters('appinsights_name')]",
+      "type": "Microsoft.Insights/components",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('appInsightsTags')]",
+      "properties": {
+        "ApplicationId": "[parameters('webAppPortalName')]",
+        "Request_Source": "IbizaWebAppExtensionCreate"
+      }
+    },
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2019-08-01",
+      "name": "[parameters('hostingPlanName')]",
+      "kind": "app",
+      "location": "[parameters('location')]",
+      "sku": {
+        "Tier": "[parameters('skuTier')]",
+        "name": "[parameters('sku')]"
+      },
+      "properties": {
+        "name": "[parameters('hostingPlanName')]",
+        "workerSize": "[parameters('workerSize')]",
+        "numberOfWorkers": "[parameters('numberOfWorkers')]"
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2019-08-01",
+      "name": "[parameters('webAppPortalName')]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('appServiceTags')]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Insights/components/', parameters('appinsights_name'))]"
+      ],
+      "kind": "app",
+      "properties": {
+        "siteConfig": {
+          "AlwaysOn": true,
+          "use32BitWorkerProcess": false,
+          "appSettings": [
+            {
+              "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+              "value": "[reference(concat('microsoft.insights/components/', parameters('appinsights_name')), '2015-05-01').InstrumentationKey]"
+            },
+            {
+              "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+              "value": "[reference(concat('microsoft.insights/components/', parameters('appinsights_name')), '2015-05-01').ConnectionString]"
+            },
+            {
+              "name": "ApplicationInsightsAgent_EXTENSION_VERSION",
+              "value": "~2"
+            },
+            {
+              "name": "APPLICATIONINSIGHTS_JAVASCRIPT_ENABLED",
+              "value": true
+            },
+            {
+              "name": "APPINSIGHTS_PROFILERFEATURE_VERSION",
+              "value": "1.0.0"
+            },
+            {
+              "name": "APPINSIGHTS_SNAPSHOTFEATURE_VERSION",
+              "value": "1.0.0"
+            },
+            {
+              "name": "DiagnosticServices_EXTENSION_VERSION",
+              "value": "~3"
+            },
+            {
+              "name": "XDT_MicrosoftApplicationInsights_Mode",
+              "value": "recommended"
+            },
+            {
+              "name": "XDT_MicrosoftApplicationInsights_PreemptSdk",
+              "value": "1"
+            },
+            {
+              "name": "InstrumentationEngine_EXTENSION_VERSION",
+              "value": "enabled"
+            },
+            {
+              "name": "SnapshotDebugger_EXTENSION_VERSION",
+              "value": "enabled"
+            },
+            {
+              "name": "WEBSITE_NODE_DEFAULT_VERSION",
+              "value": "6.9.1"
+            }
+          ],
+          "autoHealEnabled": true,
+          "cors": {
+            "allowedOrigins": []
+          },
+          "ipSecurityRestrictions": "[parameters('ipRules')]",
+          "scmIpSecurityRestrictions": "[parameters('ipRules')]",
+          "detailedErrorLoggingEnabled": true,
+          "requestTracingEnabled": true,
+          "httpLoggingEnabled": true
+        },
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms',parameters('hostingPlanName'))]",
+        "httpsOnly": true
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites/providers/diagnosticsettings",
+      "apiVersion": "2017-05-01-preview",
+      "name": "[concat(parameters('webAppPortalName'), '/Microsoft.Insights/service')]",
+      "dependsOn": [
+        "[concat('Microsoft.Web/sites/', parameters('webAppPortalName'))]"
+      ],
+      "properties": {
+        "workspaceId": "[if(empty(parameters('workspaceId')), json('null'), parameters('workspaceId'))]",
+        "metrics": "[variables('diagnosticsMetrics')]",
+        "logs": "[variables('diagnosticsLogs')]"
+      }
+    },
+    {
+      "type": "Microsoft.Web/serverfarms/providers/diagnosticsettings",
+      "apiVersion": "2017-05-01-preview",
+      "name": "[concat(parameters('hostingPlanName'), '/Microsoft.Insights/service')]",
+      "dependsOn": [
+        "[concat('Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]"
+      ],
+      "properties": {
+        "workspaceId": "[if(empty(parameters('workspaceId')), json('null'), parameters('workspaceId'))]",
+        "metrics": "[variables('diagnosticsMetrics')]",
+        "logs": "[variables('serverfarmdiagnosticsLogs')]"
+      }
+    }
+  ],
+  "functions": [
+  ],
+  "outputs": {
+    "appServiceResourceGroup": {
+      "type": "string",
+      "value": "[resourceGroup().name]",
+      "metadata": {
+        "description": "The name of the Resource Group with the Application Web Services"
+      }
+    },
+    "webAppObjectId": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Web/sites', parameters('webAppPortalName')), '2019-08-01', 'full').identity.principalId]"
+    },
+    "appServiceResourceId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Web/sites', parameters('webAppPortalName'))]",
+      "metadata": {
+        "description": "The Resource id of the resource deployed."
+      }
+    }
+  }
+}

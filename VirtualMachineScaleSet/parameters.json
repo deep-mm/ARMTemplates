@@ -1,0 +1,183 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "VMSetName": {
+      "value": "Default VMSetName"
+    },
+    "subnet0Name": {
+      "value": "Subnet1"
+    },
+    "subnet0Prefix": {
+      "value": "172.16.8.0/26"
+    },
+    "publicIPAddressName": {
+      "value": "PublicIP-VM"
+    },
+    "vmStorageAccountContainerName": {
+      "value": "vhds"
+    },
+    "adminUserName": {
+      "value": "Vmssadmin"
+    },
+    "adminPassword": {
+      "value": "securestring"
+    },
+    "virtualNetworkName": {
+      "value": "VNet"
+    },
+    "addressPrefix": {
+      "value": "172.16.8.0/24"
+    },
+    "dnsName": {
+      "value": "string"
+    },
+    "nicName": {
+      "value": "NIC"
+    },
+    "lbName": {
+      "value": "LoadBalancer"
+    },
+    "lbIPName": {
+      "value": "PublicIP-LB-FE"
+    },
+    "vmImageOffer": {
+      "value": "UbuntuServer"
+    },
+    "vmImageSku": {
+      "value": "18.04-LTS"
+    },
+    "loadBalancedAppPort1": {
+      "value": 2133
+    },
+    "loadBalancedAppPort2": {
+      "value": 8082
+    },
+    "nt0InstanceCount": {
+      "value": 2
+    },
+    "vmNodeType0Name": {
+      "value": "nttestnd1"
+    },
+    "vmNodeType0Size": {
+      "value": "Standard_D2s_v3"
+    },
+    "networkSecurityGroupName": {
+      "value": "Default NSG Name"
+    },
+    "workspaceId": {
+      "value": "Default Workspace Id"
+    },
+    "storageAccountName": {
+      "value": "Default Storage Account Name"
+    },
+    "storageAccountAccessKey": {
+      "value": ""
+    },
+    "workspaceIdno": {
+      "value": "Default WorkSpace Id"
+    },
+    "agentIpAddr": {
+      "value": "Agent Ip Addr"
+    },
+    "certificateName": {
+      "value": "FakeAvNextCA"
+    },
+    "env": {
+      "value": "dev"
+    },
+    "loc": {
+      "value": "emea"
+    },
+    "applicationDiagnosticsStorageAccountName": {
+      "value": "Default Value"
+    },
+    "workspaceKey": {
+      "value": ""
+    },
+    "networkSecurityGroupSecurityRules": {
+      "value": [
+        {
+          "name": "Port_80",
+          "properties": {
+            "description": "Allow inbound access on TCP 80",
+            "protocol": "TCP",
+            "sourcePortRange": "*",
+            "destinationPortRange": "80",
+            "sourceAddressPrefix": "*",
+            "destinationAddressPrefix": "*",
+            "access": "Allow",
+            "priority": 110,
+            "direction": "Inbound",
+            "sourcePortRanges": [],
+            "destinationPortRanges": [],
+            "sourceAddressPrefixes": [],
+            "destinationAddressPrefixes": [],
+            "sourceApplicationSecurityGroupIds": [],
+            "destinationApplicationSecurityGroupIds": []
+          }
+        },
+        {
+          "name": "Port_443",
+          "properties": {
+            "description": "Allow inbound access on TCP 443",
+            "protocol": "TCP",
+            "sourcePortRange": "*",
+            "destinationPortRange": "443",
+            "sourceAddressPrefix": "*",
+            "destinationAddressPrefix": "*",
+            "access": "Allow",
+            "priority": 120,
+            "direction": "Inbound",
+            "sourcePortRanges": [],
+            "destinationPortRanges": [],
+            "sourceAddressPrefixes": [],
+            "destinationAddressPrefixes": [],
+            "sourceApplicationSecurityGroupIds": [],
+            "destinationApplicationSecurityGroupIds": []
+          }
+        },
+        {
+          "name": "Port_22",
+          "properties": {
+            "description": "Allow inbound access on TCP 22",
+            "protocol": "TCP",
+            "sourcePortRange": "*",
+            "destinationPortRange": "22",
+            "sourceAddressPrefix": "[parameters('agentIpAddr')]",
+            "destinationAddressPrefix": "*",
+            "access": "Allow",
+            "priority": 100,
+            "direction": "Inbound",
+            "sourcePortRanges": [],
+            "destinationPortRanges": [],
+            "sourceAddressPrefixes": [],
+            "destinationAddressPrefixes": [],
+            "sourceApplicationSecurityGroupIds": [],
+            "destinationApplicationSecurityGroupIds": []
+          }
+        },
+        {
+          "name": "Port_2133",
+          "properties": {
+            "description": "Allow inbound access on TCP 2133",
+            "protocol": "TCP",
+            "sourcePortRange": "*",
+            "destinationPortRange": "2133",
+            "sourceAddressPrefix": "*",
+            "destinationAddressPrefix": "*",
+            "access": "Allow",
+            "priority": 140,
+            "direction": "Inbound",
+            "sourcePortRanges": [],
+            "destinationPortRanges": [],
+            "sourceAddressPrefixes": [],
+            "destinationAddressPrefixes": [],
+            "sourceApplicationSecurityGroupIds": [],
+            "destinationApplicationSecurityGroupIds": []
+          }
+        }
+      ]
+    }
+  }
+}

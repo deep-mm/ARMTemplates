@@ -1,0 +1,100 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "dnszone_name": {
+      "defaultValue": "dnszone_name",
+      "type": "String"
+    },
+    "trafficManager001ResourceId": {
+      "defaultValue": "",
+      "type": "String"
+    },
+    "trafficManager002ResourceId": {
+      "defaultValue": "",
+      "type": "String"
+    }
+  },
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Network/dnszones",
+      "apiVersion": "2018-05-01",
+      "name": "[parameters('dnszone_name')]",
+      "location": "global",
+      "properties": {
+        "zoneType": "Public"
+      }
+    },
+    {
+      "type": "Microsoft.Network/dnszones/CNAME",
+      "apiVersion": "2018-05-01",
+      "name": "[concat(parameters('dnszone_name'), '/adminportal')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/dnszones', parameters('dnszone_name'))]"
+      ],
+      "properties": {
+        "TTL": 1,
+        "targetResource": {
+          "id": "[parameters('trafficManager002ResourceId')]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Network/dnszones/CNAME",
+      "apiVersion": "2018-05-01",
+      "name": "[concat(parameters('dnszone_name'), '/ads')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/dnszones', parameters('dnszone_name'))]"
+      ],
+      "properties": {
+        "TTL": 1,
+        "targetResource": {
+          "id": "[parameters('trafficManager001ResourceId')]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Network/dnszones/CNAME",
+      "apiVersion": "2018-05-01",
+      "name": "[concat(parameters('dnszone_name'), '/mds')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/dnszones', parameters('dnszone_name'))]"
+      ],
+      "properties": {
+        "TTL": 1,
+        "targetResource": {
+          "id": "[parameters('trafficManager001ResourceId')]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Network/dnszones/CNAME",
+      "apiVersion": "2018-05-01",
+      "name": "[concat(parameters('dnszone_name'), '/ntrip')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/dnszones', parameters('dnszone_name'))]"
+      ],
+      "properties": {
+        "TTL": 1,
+        "targetResource": {
+          "id": "[parameters('trafficManager001ResourceId')]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Network/dnszones/CNAME",
+      "apiVersion": "2018-05-01",
+      "name": "[concat(parameters('dnszone_name'), '/pdc')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/dnszones', parameters('dnszone_name'))]"
+      ],
+      "properties": {
+        "TTL": 1,
+        "targetResource": {
+          "id": "[parameters('trafficManager001ResourceId')]"
+        }
+      }
+    }
+  ]
+}

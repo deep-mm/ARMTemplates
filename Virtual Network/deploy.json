@@ -1,0 +1,120 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "vNetName": {
+      "type": "string",
+      "metadata": {
+        "description": "Required. The Virtual Network (vNet) Name."
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Optional. Location for all resources."
+      }
+    },
+    "vNetAddressPrefixes": {
+      "type": "array",
+      "metadata": {
+        "description": "Required. An Array of 1 or more IP Address Prefixes for the Virtual Network."
+      }
+    },
+    "subnets": {
+      "type": "array",
+      "minLength": 1,
+      "metadata": {
+        "description": "Required. An Array of subnets to deploy to the Virual Network."
+      }
+    }
+  },
+  "variables": {
+    "subnetNamesToOutput": {
+      "copy": [
+        {
+          "name": "subnetNamesOutput",
+          "count": "[length(parameters('subnets'))]",
+          "input": "[parameters('subnets')[copyIndex('subnetNamesOutput')].name]"
+        }
+      ]
+    },
+    "subnetIdsToOutput": {
+      "copy": [
+        {
+          "name": "subnetIdsOutput",
+          "count": "[length(parameters('subnets'))]",
+          "input": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vNetName'), parameters('subnets')[copyIndex('subnetIdsOutput')].name)]"
+        }
+      ]
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2020-05-01",
+      "name": "[parameters('vNetName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": "[parameters('vNetAddressPrefixes')]"
+        },
+        "copy": [
+          {
+            "name": "subnets",
+            "count": "[length(parameters('subnets'))]",
+            "input": {
+              "name": "[parameters('subnets')[copyIndex('subnets')].name]",
+              "properties": {
+                "addressPrefix": "[parameters('subnets')[copyIndex('subnets')].addressPrefix]",
+                "networkSecurityGroup": "[if(empty(parameters('subnets')[copyIndex('subnets')].networkSecurityGroupName), json('null'), json(concat('{\"id\": \"', resourceId('Microsoft.Network/networkSecurityGroups', parameters('subnets')[copyIndex('subnets')].networkSecurityGroupName), '\"}')))]",
+                "routeTable": "[if(empty(parameters('subnets')[copyIndex('subnets')].routeTableName), json('null'), json(concat('{\"id\": \"', resourceId('Microsoft.Network/routeTables', parameters('subnets')[copyIndex('subnets')].routeTableName), '\"}')))]",
+                "serviceEndpoints": "[if(empty(parameters('subnets')[copyIndex('subnets')].serviceEndpoints), json('null'), parameters('subnets')[copyIndex('subnets')].serviceEndpoints)]",
+                "delegations": "[if(empty(parameters('subnets')[copyIndex('subnets')].delegations), json('null'),parameters('subnets')[copyIndex('subnets')].delegations)]"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "functions": [
+  ],
+  "outputs": {
+    "vNetResourceGroup": {
+      "type": "string",
+      "value": "[resourceGroup().name]",
+      "metadata": {
+        "description": "The name of the Resource Group the Virtual Network was created in."
+      }
+    },
+    "vNetResourceId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Network/virtualNetworks', parameters('vNetName'))]",
+      "metadata": {
+        "description": "The Resource id of the Virtual Network deployed."
+      }
+    },
+    "vNetName": {
+      "type": "string",
+      "value": "[parameters('vNetName')]",
+      "metadata": {
+        "description": "The name of the Virtual Network deployed."
+      }
+    },
+    "subnetNames": {
+      "type": "array",
+      "value": "[variables('subnetNamesToOutput').subnetNamesOutput]",
+      "metadata": {
+        "description": "The Names of the Subnets deployed to the Virtual Network."
+      }
+    },
+    "subnetIds": {
+      "type": "array",
+      "value": "[variables('subnetIdsToOutput').subnetIdsOutput]",
+      "metadata": {
+        "description": "The Resource Ids of the Subnets deployed to the Virtual Network."
+      }
+    }
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "allowAzureIps": {
+      "value": false
+    },
+    "administratorLogin": {
+      "value": "Default Admin Login"
+    },
+    "administratorPassword": {
+      "value": "Default Password"
+    },
+    "ServicePrincipleObjectId": {
+      "value": "Default Object Id"
+    },
+    "WebAppObjectId": {
+      "value": "Default WebApp Object Id"
+    },
+    "tenantId": {
+      "value": "Default Tenant Id"
+    },
+    "aadLogin": {
+      "value": "Default AAD Login"
+    },
+    "aadLoginWebApp": {
+      "value": "Default AAD Login Web App"
+    },
+    "diagnosticStorageAccountName": {
+      "value": "Default Storage Account Name"
+    },
+    "diagnosticStorageAccountAccessKey": {
+      "value": "Default Storage Account Access Key"
+    },
+    "location": {
+      "value": "Default Location"
+    },
+    "serverName": {
+      "value": "Default Server Name"
+    },
+    "diagnosticSettingsName": {
+      "value": "diagnosticSettings"
+    },
+    "enableADS": {
+      "value": true
+    },
+    "tags": {
+      "value": {}
+    },
+    "vNetId": {
+      "value": "Default VNet Id"
+    },
+    "diagnosticLogsRetentionInDays": {
+      "value": 365
+    },
+    "workspaceId": {
+      "value": "Default Workspace Id"
+    }
+  }
+}

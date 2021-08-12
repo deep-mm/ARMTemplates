@@ -1,0 +1,51 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "virtualMachineName": {
+      "value": "TestSqlVM"
+    },
+    "virtualMachineSize": {
+      "value": "Standard_DS13_v2"
+    },
+    "existingVirtualNetworkName": {
+      "value": "Test-VNET-Dev"
+    },
+    "existingVnetResourceGroup": {
+      "value": "Backend-DEV-RG"
+    },
+    "existingSubnetName": {
+      "value": "SqlVMSubnet"
+    },
+    "imageOffer": {
+      "value": "SQL2017-WS2016"
+    },
+    "sqlSku": {
+      "value": "Standard"
+    },
+    "adminUsername": {
+      "value": "Admin"
+    },
+    "adminPassword": {
+      "value": "secure@Password123"
+    },
+    "storageWorkloadType": {
+      "value": "General"
+    },
+    "sqlDataDisksCount": {
+      "value": 1
+    },
+    "dataPath": {
+      "value": "F:\\SQLData"
+    },
+    "sqlLogDisksCount": {
+      "value": 1
+    },
+    "logPath": {
+      "value": "G:\\SQLLog"
+    },
+    "location": {
+      "value": "Central US"
+    }
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "logAnalyticsWorkspaceName": {
+      "type": "string",
+      "metadata": {
+        "description": "Required. Name of the Log Analytics workspace"
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Location for all resources"
+      }
+    },
+    "dataRetention": {
+      "type": "int",
+      "defaultValue": 365,
+      "minValue": 0,
+      "maxValue": 730,
+      "metadata": {
+        "description": "Required. Number of days data will be retained for"
+      }
+    },
+    "serviceTier": {
+      "type": "string",
+      "defaultValue": "PerGB2018",
+      "allowedValues": [
+        "Free",
+        "Standalone",
+        "PerNode",
+        "PerGB2018"
+      ],
+      "metadata": {
+        "description": "Required. Service Tier: PerGB2018, Free, Standalone, PerGB or PerNode"
+      }
+    },
+    "logAnalyticsTags": {
+      "type": "object",
+      "defaultValue": {
+      },
+      "metadata": {
+        "description": "Optional. Tags of the resource."
+      }
+    }
+  },
+  "variables": {
+    "logAnalyticsSearchVersion": 1
+  },
+  "resources": [
+    {
+      "type": "Microsoft.OperationalInsights/workspaces",
+      "apiVersion": "2020-03-01-preview",
+      "location": "[parameters('location')]",
+      "name": "[parameters('logAnalyticsWorkspaceName')]",
+      "tags": "[parameters('logAnalyticsTags')]",
+      "properties": {
+        "features": {
+          "searchVersion": "[variables('logAnalyticsSearchVersion')]"
+        },
+        "sku": {
+          "name": "[parameters('serviceTier')]"
+        },
+        "retentionInDays": "[parameters('dataRetention')]"
+      }
+    }
+  ],
+  "functions": [
+  ],
+  "outputs": {
+    "logAnalyticsWorkspaceResourceId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('logAnalyticsWorkspaceName'))]",
+      "metadata": {
+        "description": "The Resource Id of the Log Analytics workspace deployed."
+      }
+    },
+    "logAnalyticsWorkspaceId": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.OperationalInsights/workspaces', parameters('logAnalyticsWorkspaceName')), '2015-03-20').customerId]",
+      "metadata": {
+        "description": "The Workspace Id for Log Analytics."
+      }
+    },
+    "logAnalyticsWorkspaceKey": {
+      "type": "string",
+      "value": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces', parameters('logAnalyticsWorkspaceName')),'2015-11-01-preview').primarySharedKey]",
+      "metadata": {
+        "description": "The Workspace Id for Log Analytics."
+      }
+    }
+  }
+}

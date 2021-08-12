@@ -1,0 +1,27 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "virtualNetworkGatewayName": {
+      "value": "Test-VNetGateway-Dev"
+    },
+    "virtualNetworkGatewayType": {
+      "value": "ExpressRoute"
+    },
+    "virtualNetworkGatewaySku": {
+      "value": "VpnGw1AZ"
+    },
+    "vpnType": {
+      "value": "RouteBased"
+    },
+    "vpnGatewayGeneration": {
+      "value": "Generation2"
+    },
+    "activeActive": {
+      "value": false
+    },
+    "vNetId": {
+      "value": "/subscriptions/"
+    }
+  }
+}

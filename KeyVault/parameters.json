@@ -1,0 +1,53 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "keyVaultName": {
+      "value": "KeyVaultName"
+    },
+    "enableSoftDelete": {
+      "value": true
+    },
+    "enablePurgeProtection": {
+      "value": true
+    },
+    "vaultSku": {
+      "value": "Standard"
+    },
+    "accessPolicies": {
+      "value": [
+        {
+          "tenantId": "DefaultTenantId",
+          "objectId": "DefaultObjectId",
+          "permissions": {
+            "secrets": [
+              "Get"
+            ]
+          }
+        }
+      ]
+    },
+    "secretsObject": {
+      "value": {
+        "secrets": [
+          {
+            "secretName": "Default Secret Name",
+            "secretValue": "Default Secret Value"
+          }
+        ]
+      }
+    },
+    "tags": {
+      "value": {
+        "displayName": "tagName"
+      }
+    },
+    "workspaceId": {
+      "value": "Default WorkspaceId"
+    },
+    "ipRules": {
+      "value": [
+      ]
+    }
+  }
+}

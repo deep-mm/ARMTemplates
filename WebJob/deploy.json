@@ -1,0 +1,187 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "webAppPortalName": {
+      "type": "string",
+      "metadata": {
+        "description": "Required. Name of the Web Application Portal Name"
+      }
+    },
+    "hostingPlanName": {
+      "type": "string",
+      "metadata": {
+        "description": "Required. Name of the Application Service Plan"
+      }
+    },
+    "workerSize": {
+      "type": "int",
+      "defaultValue": 1,
+      "metadata": {
+        "description": "Optional. Defines the number of workers from the worker pool that will be used by the app service plan"
+      }
+    },
+    "sku": {
+      "type": "string",
+      "allowedValues": [
+        "F1",
+        "D1",
+        "B1",
+        "B2",
+        "B3",
+        "S1",
+        "S2",
+        "S3",
+        "P1",
+        "P2",
+        "P3",
+        "P4"
+      ],
+      "defaultValue": "F1",
+      "metadata": {
+        "description": "Optional. The pricing tier for the hosting plan."
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Optional. Location for all Resources."
+      }
+    },
+    "appinsights_name": {
+      "defaultValue": "Default AppInsights",
+      "type": "String"
+    },
+    "vNetId": {
+      "defaultValue": "Default VNet Id",
+      "type": "String"
+    },
+    "storage_name": {
+      "defaultValue": "Default Storage",
+      "type": "String"
+    }
+  },
+  "variables": {
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2015-05-01-preview",
+      "name": "[parameters('storage_name')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "accountType": "Standard_LRS"
+      }
+    },
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2019-08-01",
+      "name": "[parameters('hostingPlanName')]",
+      "kind": "app",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "[parameters('sku')]",
+        "capacity": "[parameters('workerSize')]"
+      },
+      "properties": {
+        "name": "[parameters('hostingPlanName')]"
+      }
+    },
+    {
+      "apiVersion": "2015-05-01",
+      "name": "[parameters('appinsights_name')]",
+      "type": "Microsoft.Insights/components",
+      "location": "[parameters('location')]",
+      "properties": {
+        "ApplicationId": "[parameters('webAppPortalName')]",
+        "Request_Source": "IbizaWebAppExtensionCreate"
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2019-08-01",
+      "name": "[parameters('webAppPortalName')]",
+      "location": "[parameters('location')]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Insights/components/', parameters('appinsights_name'))]",
+        "[resourceId('Microsoft.Web/serverfarms',parameters('hostingPlanName'))]",
+        "[concat('Microsoft.Storage/storageAccounts/', parameters('storage_name'))]"
+      ],
+      "kind": "app",
+      "properties": {
+        "siteConfig": {
+          "appSettings": [
+            {
+              "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+              "value": "[reference(concat('microsoft.insights/components/', parameters('appinsights_name')), '2015-05-01').InstrumentationKey]"
+            },
+            {
+              "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+              "value": "[reference(concat('microsoft.insights/components/', parameters('appinsights_name')), '2015-05-01').ConnectionString]"
+            },
+            {
+              "name": "AzureWebJobsStorage",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',parameters('storage_name'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storage_name')), '2015-05-01-preview').key1)]"
+            },
+            {
+              "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',parameters('storage_name'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storage_name')), '2015-05-01-preview').key1)]"
+            },
+            {
+              "name": "WEBSITE_CONTENTSHARE",
+              "value": "[concat(toLower(parameters('webAppPortalName')), '8ea4')]"
+            }
+          ],
+          "cors": {
+            "allowedOrigins": [
+              "*"
+            ]
+          }
+        },
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms',parameters('hostingPlanName'))]",
+        "httpsOnly": true
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites/networkConfig",
+      "name": "[concat(parameters('webAppPortalName'),'/VirtualNetwork')]",
+      "apiVersion": "2016-08-01",
+      "dependsOn": [
+        "[concat('Microsoft.Web/sites/', parameters('webAppPortalName'))]"
+      ],
+      "properties": {
+        "subnetResourceId": "[parameters('vNetId')]",
+        "swiftSupported": true
+      }
+    }
+  ],
+  "functions": [
+  ],
+  "outputs": {
+    "appServiceName": {
+      "type": "string",
+      "value": "[parameters('hostingPlanName')]",
+      "metadata": {
+        "description": "The Name of the Application Web Services"
+      }
+    },
+    "appServiceResourceId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Web/serverfarms',parameters('hostingPlanName'))]",
+      "metadata": {
+        "description": "The Resource Id of the Application Web Services"
+      }
+    },
+    "appServiceResourceGroup": {
+      "type": "string",
+      "value": "[resourceGroup().name]",
+      "metadata": {
+        "description": "The name of the Resource Group with the Application Web Services"
+      }
+    }
+  }
+}

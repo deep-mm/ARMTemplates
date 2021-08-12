@@ -1,0 +1,33 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "webAppPortalName": {
+      "value": "Default WebPortalName"
+    },
+    "hostingPlanName": {
+      "value": "Default HostingPlanName"
+    },
+    "workerSize": {
+      "value": 1
+    },
+    "numberOfWorkers": {
+      "value": 1
+    },
+    "sku": {
+      "value": "B1"
+    },
+    "skuTier": {
+      "value": "Basic"
+    },
+    "appinsights_name": {
+      "value": "Default AppInsightsName"
+    },
+    "workspaceId": {
+      "value": "Default WorkspaceId"
+    },
+    "ipRules": {
+      "value": []
+    }
+  }
+}

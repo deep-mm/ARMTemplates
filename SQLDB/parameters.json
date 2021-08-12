@@ -1,0 +1,49 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "databaseName": {
+      "value": "Default Database Name"
+    },
+    "tier": {
+      "value": "Standard"
+    },
+    "skuName": {
+      "value": "Standard"
+    },
+    "capacity": {
+      "value": 10
+    },
+    "serverName": {
+      "value": "Default Server Name"
+    },
+    "zoneRedundant": {
+      "value": false
+    },
+    "numberOfReplicas": {
+      "value": 0
+    },
+    "enableADS": {
+      "value": false
+    },
+    "tags": {
+      "value": {
+      }
+    },
+    "location": {
+      "value": "Default Location"
+    },
+    "diagnosticLogsRetentionInDays": {
+      "value": 365
+    },
+    "diagnosticStorageAccountId": {
+      "value": "Default Storage Account Id"
+    },
+    "workspaceId": {
+      "value": "Default Workspace Id"
+    },
+    "backupRetention": {
+      "value": 35
+    }
+  }
+}

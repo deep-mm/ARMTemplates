@@ -1,0 +1,15 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "clusters_kustocluster_name": {
+      "value": "Default Cluster Name"
+    },
+    "databases_kustodb_name": {
+      "value": "Default DB Name"
+    },
+    "workspaceId": {
+      "value": "Default WorkspaceId"
+    }
+  }
+}

@@ -1,0 +1,320 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "databaseName": {
+      "type": "string",
+      "metadata": {
+        "description": "Required. The name of the database."
+      }
+    },
+    "tier": {
+      "type": "string",
+      "metadata": {
+        "description": "Optional. The tier or edition of the particular SKU."
+      }
+    },
+    "skuName": {
+      "type": "string",
+      "metadata": {
+        "description": "Required. The name of the SKU."
+      }
+    },
+    "capacity": {
+      "type": "int",
+      "metadata": {
+        "description": "Required. The capacity of Tier."
+      }
+    },
+    "serverName": {
+      "type": "string",
+      "metadata": {
+        "description": "Required. The Name of SQL Server"
+      }
+    },
+    "zoneRedundant": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Optional. Whether or not this database is zone redundant."
+      }
+    },
+    "numberOfReplicas": {
+      "type": "int",
+      "defaultValue": 0,
+      "metadata": {
+        "description": "Optional. The number of readonly secondary replicas associated with the database."
+      }
+    },
+    "enableADS": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Optional. Whether or not ADS is enabled."
+      }
+    },
+    "tags": {
+      "type": "object",
+      "defaultValue": {
+      },
+      "metadata": {
+        "description": "Optional. Tags of the resource."
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Optional. Location for all resources."
+      }
+    },
+    "diagnosticLogsRetentionInDays": {
+      "type": "int",
+      "defaultValue": 365,
+      "minValue": 0,
+      "maxValue": 365,
+      "metadata": {
+        "description": "Optional. Specifies the number of days that logs will be kept for; a value of 0 will retain data indefinitely."
+      }
+    },
+    "diagnosticStorageAccountId": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Optional. Resource identifier of the Diagnostic Storage Account."
+      }
+    },
+    "workspaceId": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Optional. Resource identifier of Log Analytics."
+      }
+    },
+    "backupRetention": {
+      "type": "int",
+      "defaultValue": "35",
+      "metadata": {
+        "description": "Backup Retention period"
+      }
+    }
+  },
+  "variables": {
+    "diagnosticsMetrics": [
+      {
+        "category": "Basic",
+        "enabled": true,
+        "retentionPolicy": {
+          "days": "[parameters('diagnosticLogsRetentionInDays')]",
+          "enabled": true
+        }
+      },
+      {
+        "category": "InstanceAndAppAdvanced",
+        "enabled": true,
+        "retentionPolicy": {
+          "days": "[parameters('diagnosticLogsRetentionInDays')]",
+          "enabled": true
+        }
+      },
+      {
+        "category": "WorkloadManagement",
+        "enabled": true,
+        "retentionPolicy": {
+          "days": "[parameters('diagnosticLogsRetentionInDays')]",
+          "enabled": true
+        }
+      }
+    ],
+    "diagnosticsLogs": [
+      {
+        "category": "SQLSecurityAuditEvents",
+        "enabled": true,
+        "retentionPolicy": {
+          "enabled": true,
+          "days": "[parameters('diagnosticLogsRetentionInDays')]"
+        }
+      },
+      {
+        "category": "SQLInsights",
+        "enabled": true,
+        "retentionPolicy": {
+          "enabled": true,
+          "days": "[parameters('diagnosticLogsRetentionInDays')]"
+        }
+      },
+      {
+        "category": "QueryStoreRuntimeStatistics",
+        "enabled": true,
+        "retentionPolicy": {
+          "enabled": true,
+          "days": "[parameters('diagnosticLogsRetentionInDays')]"
+        }
+      },
+      {
+        "category": "QueryStoreWaitStatistics",
+        "enabled": true,
+        "retentionPolicy": {
+          "enabled": true,
+          "days": "[parameters('diagnosticLogsRetentionInDays')]"
+        }
+      },
+      {
+        "category": "Errors",
+        "enabled": true,
+        "retentionPolicy": {
+          "enabled": true,
+          "days": "[parameters('diagnosticLogsRetentionInDays')]"
+        }
+      },
+      {
+        "category": "DatabaseWaitStatistics",
+        "enabled": true,
+        "retentionPolicy": {
+          "enabled": true,
+          "days": "[parameters('diagnosticLogsRetentionInDays')]"
+        }
+      },
+      {
+        "category": "Timeouts",
+        "enabled": true,
+        "retentionPolicy": {
+          "enabled": true,
+          "days": "[parameters('diagnosticLogsRetentionInDays')]"
+        }
+      },
+      {
+        "category": "Blocks",
+        "enabled": true,
+        "retentionPolicy": {
+          "enabled": true,
+          "days": "[parameters('diagnosticLogsRetentionInDays')]"
+        }
+      },
+      {
+        "category": "Deadlocks",
+        "enabled": true,
+        "retentionPolicy": {
+          "enabled": true,
+          "days": "[parameters('diagnosticLogsRetentionInDays')]"
+        }
+      }
+    ]
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Sql/servers/databases",
+      "apiVersion": "2019-06-01-preview",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "name": "[concat(parameters('serverName'), '/', parameters('databaseName'))]",
+      "properties": {
+        "zoneRedundant": "[parameters('zoneRedundant')]",
+        "readReplicaCount": "[parameters('numberOfReplicas')]"
+      },
+      "sku": {
+        "name": "[parameters('skuName')]",
+        "tier": "[parameters('tier')]",
+        "capacity": "[parameters('capacity')]"
+      },
+      "resources": [
+        {
+          "type": "auditingSettings",
+          "apiVersion": "[providers('Microsoft.Sql','servers/databases/auditingSettings').apiVersions[0]]",
+          "name": "AuditingSettingsDefault",
+          "properties": {
+            "State": "Enabled",
+            "isAzureMonitorTargetEnabled": true,
+            "retentionDays": "[parameters('diagnosticLogsRetentionInDays')]",
+            "auditActionsAndGroups": [
+              "BATCH_STARTED_GROUP",
+              "BATCH_COMPLETED_GROUP",
+              "APPLICATION_ROLE_CHANGE_PASSWORD_GROUP",
+              "BACKUP_RESTORE_GROUP",
+              "DATABASE_LOGOUT_GROUP",
+              "DATABASE_OBJECT_CHANGE_GROUP",
+              "DATABASE_OBJECT_OWNERSHIP_CHANGE_GROUP",
+              "DATABASE_OBJECT_PERMISSION_CHANGE_GROUP",
+              "FAILED_DATABASE_AUTHENTICATION_GROUP",
+              "SCHEMA_OBJECT_ACCESS_GROUP",
+              "SCHEMA_OBJECT_CHANGE_GROUP",
+              "SCHEMA_OBJECT_OWNERSHIP_CHANGE_GROUP",
+              "SCHEMA_OBJECT_PERMISSION_CHANGE_GROUP",
+              "SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP",
+              "USER_CHANGE_PASSWORD_GROUP",
+              "DATABASE_PERMISSION_CHANGE_GROUP",
+              "DATABASE_PRINCIPAL_CHANGE_GROUP",
+              "DATABASE_PRINCIPAL_IMPERSONATION_GROUP",
+              "DATABASE_ROLE_MEMBER_CHANGE_GROUP",
+              "DATABASE_OPERATION_GROUP"
+            ]
+          },
+          "dependsOn": [
+            "[resourceId('Microsoft.Sql/servers/databases', parameters('serverName'), parameters('databaseName'))]"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Microsoft.Sql/servers/databases/providers/diagnosticSettings",
+      "apiVersion": "2017-05-01-preview",
+      "name": "[concat(parameters('serverName'),'/',parameters('databaseName'),'/microsoft.insights/DiagnosticSettings')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Sql/servers/databases', parameters('serverName'), parameters('databaseName'))]"
+      ],
+      "properties": {
+        "storageAccountId": "[if(empty(parameters('diagnosticStorageAccountId')), json('null'), parameters('diagnosticStorageAccountId'))]",
+        "workspaceId": "[if(empty(parameters('workspaceId')), json('null'), parameters('workspaceId'))]",
+        "metrics": "[variables('diagnosticsMetrics')]",
+        "logs": "[variables('diagnosticsLogs')]"
+      }
+    },
+    {
+      "type": "Microsoft.Sql/servers/databases/backupLongTermRetentionPolicies",
+      "apiVersion": "2017-03-01-preview",
+      "name": "[concat(parameters('serverName'),'/',parameters('databaseName'),'/default')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Sql/servers/databases', parameters('serverName'), parameters('databaseName'))]"
+      ],
+      "properties": {
+        "weeklyRetention": "P4W"
+      }
+    },
+    {
+      "type": "Microsoft.Sql/servers/databases/backupShortTermRetentionPolicies",
+      "apiVersion": "2020-02-02-preview",
+      "name": "[concat(parameters('serverName'),'/',parameters('databaseName'),'/default')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Sql/servers/databases', parameters('serverName'), parameters('databaseName'))]"
+      ],
+      "properties": {
+        "retentionDays": "[parameters('backupRetention')]"
+      }
+    }
+  ],
+  "functions": [
+  ],
+  "outputs": {
+    "databaseName": {
+      "type": "string",
+      "value": "[parameters('databaseName')]",
+      "metadata": {
+        "description": "The name of the created database."
+      }
+    },
+    "databaseResourceGroup": {
+      "type": "string",
+      "value": "[resourceGroup().name]",
+      "metadata": {
+        "description": "Name of the Databse ResourceGroup."
+      }
+    },
+    "serverName": {
+      "type": "string",
+      "value": "[parameters('serverName')]",
+      "metadata": {
+        "description": "The name of the target SQL Server instance."
+      }
+    }
+  }
+}

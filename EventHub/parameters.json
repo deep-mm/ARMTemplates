@@ -1,0 +1,25 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "namespaceName": {
+      "value": "Default Namespace name"
+    },
+    "eventHubName": {
+      "value": "Default event hub name"
+    },
+    "eventHubSku": {
+      "value": "Standard"
+    },
+    "workspaceId": {
+      "value": "Default WorkspaceId"
+    },
+    "consumerGroupName": {
+      "value": "Default Consumer Group"
+    },
+    "ipRules": {
+      "value": [
+      ]
+    }
+  }
+}

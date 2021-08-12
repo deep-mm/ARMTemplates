@@ -1,0 +1,222 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Optional. Location for all resources."
+      }
+    },
+    "resourceGroupName": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().name]",
+      "metadata": {
+        "description": "Optional. Location for all resources."
+      }
+    },
+    "storageAccountName": {
+      "type": "string",
+      "maxLength": 24,
+      "metadata": {
+        "description": "Required. Name of the Storage Account."
+      }
+    },
+    "serviceTier": {
+      "type": "string",
+      "defaultValue": "PerGB2018",
+      "allowedValues": [
+        "Free",
+        "Standalone",
+        "PerNode",
+        "PerGB2018"
+      ],
+      "metadata": {
+        "description": "Required. Service Tier: PerGB2018, Free, Standalone, PerGB or PerNode"
+      }
+    },
+    "dataRetention": {
+      "type": "int",
+      "defaultValue": 365,
+      "minValue": 0,
+      "maxValue": 730,
+      "metadata": {
+        "description": "Required. Number of days data will be retained for"
+      }
+    },
+    "storageAccountKind": {
+      "type": "string",
+      "defaultValue": "StorageV2",
+      "allowedValues": [
+        "Storage",
+        "StorageV2",
+        "BlobStorage",
+        "FileStorage",
+        "BlockBlobStorage"
+      ],
+      "metadata": {
+        "description": "Optional. Type of Storage Account to create."
+      }
+    },
+    "storageAccountSku": {
+      "type": "string",
+      "defaultValue": "Standard_GRS",
+      "allowedValues": [
+        "Standard_LRS",
+        "Standard_GRS",
+        "Standard_RAGRS",
+        "Standard_ZRS",
+        "Premium_LRS",
+        "Premium_ZRS",
+        "Standard_GZRS",
+        "Standard_RAGZRS"
+      ],
+      "metadata": {
+        "description": "Optional. Storage Account Sku Name."
+      }
+    },
+    "storageAccountAccessTier": {
+      "type": "string",
+      "defaultValue": "Cool",
+      "allowedValues": [
+        "Hot",
+        "Cool"
+      ],
+      "metadata": {
+        "description": "Optional. Storage Account Access Tier."
+      }
+    },
+    "storageTags": {
+      "type": "object",
+      "defaultValue": {
+      },
+      "metadata": {
+        "description": "Optional. Tags of the resource."
+      }
+    },
+    "prefixMatch": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Prefix for lifecycle management policy"
+      }
+    }
+  },
+  "variables": {
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "name": "[parameters('storageAccountName')]",
+      "apiVersion": "2019-06-01",
+      "location": "[parameters('location')]",
+      "kind": "[parameters('storageAccountKind')]",
+      "sku": {
+        "name": "[parameters('storageAccountSku')]"
+      },
+      "tags": "[parameters('storageTags')]",
+      "properties": {
+        "networkAcls": {
+          "defaultAction": "Allow",
+          "virtualNetworkRules": [
+          ]
+        },
+        "accessTier": "[parameters('storageAccountAccessTier')]"
+      }
+    },
+    {
+      "name": "[concat(parameters('storageAccountName'), '/default')]",
+      "type": "Microsoft.Storage/storageAccounts/blobServices",
+      "apiVersion": "2018-07-01",
+      "properties": {
+        "deleteRetentionPolicy": {
+          "enabled": true,
+          "days": 30
+        }
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Storage/storageAccounts/', parameters('storageAccountName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+      "apiVersion": "2020-08-01-preview",
+      "name": "[concat(parameters('storageAccountName'), '/default/mapdatablob')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccountName'), 'default')]",
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+      ],
+      "properties": {
+        "defaultEncryptionScope": "$account-encryption-key",
+        "denyEncryptionScopeOverride": false,
+        "publicAccess": "None"
+      }
+    },
+    {
+      "name": "[concat(parameters('storageAccountName'), '/default')]",
+      "type": "Microsoft.Storage/storageAccounts/managementPolicies",
+      "apiVersion": "2019-06-01",
+      "dependsOn": [
+        "[concat('Microsoft.Storage/storageAccounts/', parameters('storageAccountName'))]"
+      ],
+      "properties": {
+        "policy": {
+          "rules": [
+            {
+              "enabled": true,
+              "name": "delete30days",
+              "type": "Lifecycle",
+              "definition": {
+                "actions": {
+                  "baseBlob": {
+                    "delete": {
+                      "daysAfterModificationGreaterThan": 30
+                    }
+                  }
+                },
+                "filters": {
+                  "blobTypes": [
+                    "blockBlob"
+                  ],
+                  "prefixMatch": [
+                    "[parameters('prefixMatch')]"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "functions": [
+  ],
+  "outputs": {
+    "storageAccountResourceId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]",
+      "metadata": {
+        "description": "The Resource Id of the Storage Account."
+      }
+    },
+    "storageAccountName": {
+      "type": "string",
+      "value": "[parameters('storageAccountName')]",
+      "metadata": {
+        "description": "The name of the Storage Account."
+      }
+    },
+    "storageAccountAccessKey": {
+      "type": "string",
+      "value": "[listKeys(resourceId(parameters('resourceGroupName'),'Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2019-04-01').keys[0].value]",
+      "metadata": {
+        "description": "The Access Key for the Storage Account."
+      }
+    },
+    "storageAccountConnectionString": {
+      "type": "string",
+      "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', parameters('storageAccountName'), ';AccountKey=', listKeys(resourceId(parameters('resourceGroupName'),'Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2019-04-01').keys[0].value,';EndpointSuffix=core.windows.net')]"
+    }
+  }
+}

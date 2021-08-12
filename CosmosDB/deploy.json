@@ -1,0 +1,134 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "databaseAccountName": {
+      "type": "string",
+      "metadata": {
+        "description": "cosmosdb Account Name"
+      }
+    },
+    "apiType": {
+      "type": "string",
+      "allowedValues": [
+        "Cassandra",
+        "Gremlin",
+        "MongoDB",
+        "SQL",
+        "Table"
+      ],
+      "defaultValue": "SQL",
+      "metadata": {
+        "description": "cosmosdb API type"
+      }
+    },
+    "tier": {
+      "type": "string",
+      "defaultValue": "Standard",
+      "metadata": {
+        "description": "cosmosdb account tier"
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Location for all resources"
+      }
+    },
+    "workspaceId": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Optional. Resource identifier of Log Analytics."
+      }
+    },
+    "logsRetentionInDays": {
+      "type": "int",
+      "defaultValue": 30,
+      "minValue": 0,
+      "maxValue": 365,
+      "metadata": {
+        "description": "Specifies the number of days that logs will be kept for; a value of 0 will retain data indefinitely"
+      }
+    },
+    "tags": {
+      "type": "object",
+      "defaultValue": {
+      },
+      "metadata": {
+        "description": "Optional. Tags of the resource."
+      }
+    }
+  },
+  "variables": {
+    "dbAccountName": "[toLower(parameters('databaseAccountName'))]",
+    "resourceId": "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccountName'))]",
+    "apiVersion": "2015-04-08"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts",
+      "apiVersion": "2015-04-08",
+      "name": "[variables('dbAccountName')]",
+      "kind": "[if(equals(parameters('apiType'), 'MongoDB'), 'MongoDB', 'GlobalDocumentDB')]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "properties": {
+        "databaseAccountOfferType": "[parameters('tier')]",
+        "locations": [
+          {
+            "locationName": "[parameters('location')]"
+          }
+        ],
+        "capabilities": []
+      },
+      "resources": [
+        {
+          "type": "Microsoft.DocumentDB/databaseAccounts/providers/diagnosticsettings",
+          "name": "[concat(variables('dbAccountName'), '/Microsoft.Insights/service')]",
+          "apiVersion": "2016-09-01",
+          "location": "[resourceGroup().location]",
+          "dependsOn": [
+            "[concat('Microsoft.DocumentDB/databaseAccounts/', variables('dbAccountName'))]"
+          ],
+          "properties": {
+            "workspaceId": "[if(empty(parameters('workspaceId')), json('null'), parameters('workspaceId'))]",
+            "logs": [
+              {
+                "category": "DataPlaneRequests",
+                "enabled": true,
+                "retentionPolicy": {
+                  "enabled": true,
+                  "days": "[parameters('LogsRetentionInDays')]"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "outputs": {
+    "cosmosdbAccountName": {
+      "type": "string",
+      "value": "[variables('dbAccountName')]"
+    },
+    "cosmosdbEndpoint": {
+      "type": "string",
+      "value": "[reference(variables('resourceId'), variables('apiVersion')).documentEndpoint]"
+    },
+    "cosmosdbAccountKey": {
+      "type": "string",
+      "value": "[listKeys(variables('resourceId'), variables('apiVersion')).primaryMasterKey]"
+    },
+    "cosmosdbConnectionString": {
+      "type": "string",
+      "value": "[concat('AccountEndpoint=https://', variables('dbAccountName'), '.documents.azure.com:443/;AccountKey=', listKeys(variables('resourceId'), variables('apiVersion')).primaryMasterKey, ';')]"
+    },
+    "cosmosdbTableApiConnectionString": {
+      "type": "string",
+      "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('dbAccountName'), ';AccountKey=', listKeys(variables('resourceId'), variables('apiVersion')).primaryMasterKey, ';TableEndpoint=https://', variables('dbAccountName'), '.table.cosmosdb.azure.com:443/;')]"
+    }
+  }
+}

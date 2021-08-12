@@ -1,0 +1,15 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "dnszone_name": {
+      "value": "dnszone_name"
+    },
+    "trafficManager001ResourceId": {
+      "value": "traffic_manager_res_id_1"
+    },
+    "trafficManager002ResourceId": {
+      "value": "traffic_manager_res_id_2"
+    }
+  }
+}
